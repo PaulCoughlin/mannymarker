@@ -11,6 +11,7 @@ export const commands = {
   paragraph: (e: Editor) => e.chain().focus().setParagraph().run(),
   bold: (e: Editor) => e.chain().focus().toggleBold().run(),
   italic: (e: Editor) => e.chain().focus().toggleItalic().run(),
+  strike: (e: Editor) => e.chain().focus().toggleStrike().run(),
   code: (e: Editor) => e.chain().focus().toggleCode().run(),
   codeBlock: (e: Editor) => e.chain().focus().toggleCodeBlock().run(),
   subscript: (e: Editor) => e.chain().focus().toggleSubscript().run(),

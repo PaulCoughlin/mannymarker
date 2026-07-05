@@ -15,6 +15,7 @@
     "core:window:allow-available-monitors",
     "core:window:allow-outer-size",
     "core:window:allow-inner-size",
+    "core:window:allow-outer-position",
     "core:window:allow-scale-factor",
     "opener:default",
     "dialog:default",

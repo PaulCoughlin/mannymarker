@@ -6,6 +6,14 @@ import {
   exists,
 } from "@tauri-apps/plugin-fs";
 
+/** Last window geometry, all in physical pixels (inner size + outer position). */
+export interface WindowState {
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+}
+
 export interface Settings {
   fontFamily: string;
   fontSize: number;
@@ -15,6 +23,8 @@ export interface Settings {
   editorWidth: number;
   /** Horizontal padding inside the page, in px. */
   editorMargin: number;
+  /** Saved on resize/move; read by the Rust shell at startup. Absent on first run. */
+  window?: WindowState;
 }
 
 const DEFAULTS: Settings = {
@@ -43,8 +53,14 @@ export async function loadSettings(): Promise<Settings> {
 
 /** Persists settings (best-effort). */
 export async function saveSettings(s: Settings): Promise<void> {
+  // The Rust shell creates the config dir at startup; this mkdir is a fallback
+  // and must not abort the write if it rejects (empty relative paths are shaky).
   try {
     await mkdir("", { ...DIR_OPTS, recursive: true });
+  } catch {
+    // dir almost certainly exists
+  }
+  try {
     await writeTextFile(FILE, JSON.stringify(s, null, 2), DIR_OPTS);
   } catch {
     // never surface as a crash

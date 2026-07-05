@@ -66,6 +66,37 @@ fn startup_file() -> Option<String> {
     }
 }
 
+/// Saved window geometry from the frontend's settings.json — physical pixels
+/// (inner size + outer position). None on first run or unreadable settings.
+fn saved_window_state(app: &tauri::App) -> Option<(f64, f64, i32, i32)> {
+    let path = app.path().app_config_dir().ok()?.join("settings.json");
+    let text = fs::read_to_string(path).ok()?;
+    let v: serde_json::Value = serde_json::from_str(&text).ok()?;
+    let w = v.get("window")?;
+    Some((
+        w.get("width")?.as_f64()?,
+        w.get("height")?.as_f64()?,
+        w.get("x")?.as_i64()? as i32,
+        w.get("y")?.as_i64()? as i32,
+    ))
+}
+
+/// True if the point (the saved window's title-bar area) is on a connected monitor —
+/// guards against restoring onto a display that has since been unplugged.
+fn on_a_monitor(win: &tauri::WebviewWindow, x: i32, y: i32) -> bool {
+    let Ok(monitors) = win.available_monitors() else {
+        return false;
+    };
+    monitors.iter().any(|m| {
+        let pos = m.position();
+        let size = m.size();
+        x >= pos.x
+            && x < pos.x + size.width as i32
+            && y >= pos.y
+            && y < pos.y + size.height as i32
+    })
+}
+
 /// The window's intended size, in logical (scale-independent) pixels. Must match the
 /// width/height in tauri.conf.json.
 const LOGICAL_W: f64 = 1244.0;
@@ -134,11 +165,29 @@ pub fn run() {
             startup_file
         ])
         .setup(|app| {
-            // Open on whichever monitor the mouse cursor is currently on, centered.
-            // Done before the window is shown (it starts hidden in config) so there is
-            // no visible jump. No saved state — it just follows the cursor.
+            // Ensure the config dir exists so the frontend's settings writes never
+            // depend on creating it (plugin-fs mkdir with an empty relative path
+            // proved unreliable).
+            if let Ok(dir) = app.path().app_config_dir() {
+                let _ = fs::create_dir_all(dir);
+            }
+
+            // Restore the last window geometry if we have one and it is still
+            // on-screen; otherwise center on the cursor's monitor at the default
+            // size. Either way this happens before show() — no visible jump.
             if let Some(win) = app.get_webview_window("main") {
-                position_on_cursor_monitor(&win);
+                let restored = saved_window_state(app)
+                    .filter(|&(_, _, x, y)| on_a_monitor(&win, x + 40, y + 20));
+                match restored {
+                    Some((w, h, x, y)) => {
+                        // Position FIRST: applying the size while the window is
+                        // still on the (possibly different-DPI) launch monitor
+                        // gets rescaled by Windows when the move crosses DPIs.
+                        let _ = win.set_position(tauri::PhysicalPosition::new(x, y));
+                        let _ = win.set_size(tauri::PhysicalSize::new(w as u32, h as u32));
+                    }
+                    None => position_on_cursor_monitor(&win),
+                }
                 let _ = win.show();
             }
 
@@ -158,7 +207,14 @@ pub fn run() {
                 .item(&MenuItemBuilder::with_id("exit", "Exit").build(app)?)
                 .build()?;
 
-            let menu = MenuBuilder::new(app).item(&file_menu).build()?;
+            // Help menu: version info and the user guide on GitHub.
+            let help_menu = SubmenuBuilder::new(app, "Help")
+                .item(&MenuItemBuilder::with_id("help_github", "User Guide (GitHub)…").build(app)?)
+                .separator()
+                .item(&MenuItemBuilder::with_id("about", "About MannyMarker").build(app)?)
+                .build()?;
+
+            let menu = MenuBuilder::new(app).item(&file_menu).item(&help_menu).build()?;
             app.set_menu(menu)?;
 
             app.on_menu_event(move |app, event| {
@@ -167,6 +223,22 @@ pub fn run() {
                     if let Some(w) = app.get_webview_window("main") {
                         let _ = w.close();
                     }
+                } else if id == "help_github" {
+                    use tauri_plugin_opener::OpenerExt;
+                    let _ = app.opener().open_url(
+                        "https://github.com/PaulCoughlin/mannymarker/blob/main/HELP.md",
+                        None::<&str>,
+                    );
+                } else if id == "about" {
+                    use tauri_plugin_dialog::DialogExt;
+                    let info = app.package_info();
+                    app.dialog()
+                        .message(format!(
+                            "MannyMarker v{}\n\nA small, fast, native markdown editor.\nhttps://github.com/PaulCoughlin/mannymarker",
+                            info.version
+                        ))
+                        .title("About MannyMarker")
+                        .show(|_| {});
                 } else {
                     // Forward to the frontend, which owns document logic.
                     let _ = app.emit("menu", id.to_string());

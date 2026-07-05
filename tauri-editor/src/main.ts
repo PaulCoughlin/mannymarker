@@ -61,6 +61,32 @@ async function bootstrap() {
   // window ourselves if it is safe. A plain `async` handler that awaits before calling
   // preventDefault() races the event and can leave the window unable to close.
   const win = getCurrentWindow();
+
+  // Remember window geometry: saved (debounced) into settings.json on every
+  // resize/move; the Rust shell reads it at startup and restores before show.
+  let geomTimer: number | undefined;
+  const persistWindowState = () => {
+    clearTimeout(geomTimer);
+    geomTimer = window.setTimeout(async () => {
+      try {
+        // Physical units throughout — scaleFactor() reads stale after a
+        // cross-DPI move, and restoring to the same monitor position makes
+        // logical conversion unnecessary anyway.
+        const size = await win.innerSize();
+        const pos = await win.outerPosition();
+        settings = {
+          ...settings,
+          window: { width: size.width, height: size.height, x: pos.x, y: pos.y },
+        };
+        await saveSettings(settings);
+      } catch {
+        // best-effort; never disturb editing
+      }
+    }, 500);
+  };
+  await win.onResized(persistWindowState);
+  await win.onMoved(persistWindowState);
+
   let closing = false;
   await win.onCloseRequested(async (event) => {
     if (closing) return; // our own destroy() re-fires this; let it through
@@ -90,6 +116,11 @@ function setupToolbar(editor: ReturnType<typeof createEditor>, _state: DocumentS
       case "bold": commands.bold(editor); break;
       case "italic": commands.italic(editor); break;
       case "code": commands.code(editor); break;
+      case "strike": commands.strike(editor); break;
+      case "subscript": commands.subscript(editor); break;
+      case "superscript": commands.superscript(editor); break;
+      case "codeBlock": commands.codeBlock(editor); break;
+      case "image": commands.image(editor); break;
       case "bulletList": commands.bulletList(editor); break;
       case "orderedList": commands.orderedList(editor); break;
       case "blockquote": commands.blockquote(editor); break;
@@ -134,6 +165,7 @@ function setupPreferences(
 
   const apply = () => {
     const next: Settings = {
+      ...get(), // preserve fields the dialog doesn't own (window geometry)
       fontFamily: fontSel.value,
       fontSize: Number(sizeInput.value) || 15,
       spellcheckLanguage: spellSel.value,
