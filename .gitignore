@@ -1,0 +1,14 @@
+# Build / publish artifacts
+publish/
+publish-fwdep/
+*.zip
+
+# Test results
+TestResults/
+[Cc]overage*/
+
+# Visual Studio / Rider / VS Code user state
+.vs/
+.idea/
+*.suo
+*.user

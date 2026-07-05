@@ -1,0 +1,39 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-title",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
+    "core:window:allow-show",
+    "core:window:allow-set-position",
+    "core:window:allow-set-size",
+    "core:window:allow-cursor-position",
+    "core:window:allow-available-monitors",
+    "core:window:allow-outer-size",
+    "core:window:allow-inner-size",
+    "core:window:allow-scale-factor",
+    "opener:default",
+    "dialog:default",
+    "fs:default",
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [{ "path": "$APPCONFIG/**" }]
+    },
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [{ "path": "$APPCONFIG/**" }]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [{ "path": "$APPCONFIG/**" }]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [{ "path": "$APPCONFIG/**" }]
+    }
+  ]
+}

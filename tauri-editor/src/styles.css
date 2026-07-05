@@ -1,0 +1,204 @@
+:root {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #1a1a1a;
+  background: #ffffff;
+  /* Native-feeling text rendering + no web-style text selection on chrome. */
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* only the editor pane scrolls, not the whole window */
+}
+
+/* Native-looking thin scrollbars (WebView2 supports these). */
+#editor { scrollbar-width: thin; scrollbar-color: #c1c1c1 transparent; }
+#editor::-webkit-scrollbar { width: 12px; }
+#editor::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 8px;
+}
+#editor::-webkit-scrollbar-thumb:hover { background: #a8a8a8; background-clip: content-box; }
+
+/* Toolbar */
+#toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #e2e2e2;
+  background: #f7f7f7;
+  user-select: none;
+}
+#toolbar button {
+  min-width: 30px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  color: inherit;
+}
+#toolbar button:hover { background: #e6e6e6; border-color: #d5d5d5; }
+#toolbar .sep { width: 1px; height: 18px; background: #d5d5d5; margin: 0 4px; }
+#toolbar .spacer { flex: 1 1 auto; }
+#toolbar button.ghost { color: #666; font-size: 12px; }
+
+/* Status bar */
+#statusbar {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 12px;
+  border-top: 1px solid #e2e2e2;
+  background: #f7f7f7;
+  font-size: 12px;
+  color: #666;
+  user-select: none;
+}
+#status-path { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#status-saved { flex: 0 0 auto; padding: 0 16px; white-space: nowrap; }
+#status-count { flex: 0 0 auto; padding-left: 12px; white-space: nowrap; }
+#status-brand {
+  flex: 0 0 auto;
+  padding-left: 16px;
+  margin-left: 12px;
+  border-left: 1px solid #ddd;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #999;
+  white-space: nowrap;
+}
+
+/* Editor surface — the rendered document */
+#editor {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  background: #f7f7f7; /* very light grey gutter outside the page */
+}
+.ProseMirror {
+  max-width: var(--editor-width, 990px);
+  margin: 20px auto 0; /* 20px grey gap above the page, like a web page */
+  padding: 40px var(--editor-margin, 56px) 120px;
+  min-height: 100%;
+  background: #ffffff; /* the writing "page" stays white */
+  outline: none;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.ProseMirror h1 { font-size: 1.9em; font-weight: 700; }
+.ProseMirror h2 { font-size: 1.55em; font-weight: 700; }
+.ProseMirror h3 { font-size: 1.3em; font-weight: 700; }
+.ProseMirror h4 { font-size: 1.12em; font-weight: 700; }
+.ProseMirror code {
+  font-family: Consolas, monospace;
+  background: #f4f4f4;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.92em;
+}
+.ProseMirror pre {
+  font-family: Consolas, monospace;
+  background: #f4f4f4;
+  padding: 12px 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+.ProseMirror pre code { background: none; padding: 0; }
+.ProseMirror blockquote {
+  border-left: 3px solid #d0d0d0;
+  margin-left: 0;
+  padding-left: 14px;
+  color: #555;
+}
+.ProseMirror hr { border: none; border-top: 1px solid #d0d0d0; margin: 1.2em 0; }
+.ProseMirror a { color: #2563c9; }
+.ProseMirror img { max-width: 100%; }
+
+/* Tables */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: auto;
+  margin: 0.6em 0;
+}
+.ProseMirror th, .ProseMirror td {
+  border: 1px solid #cfcfcf;
+  padding: 4px 8px;
+  min-width: 40px;
+  vertical-align: top;
+}
+.ProseMirror th { background: #f4f4f4; font-weight: 700; }
+.ProseMirror .selectedCell { background: #e8f0fe; }
+
+/* Custom context menu (table ops + add-to-dictionary) */
+.ctxmenu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 180px;
+  background: #ffffff;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  font-size: 13px;
+}
+.ctx-item { padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+.ctx-item:hover { background: #e8f0fe; }
+.ctx-sep { height: 1px; background: #e2e2e2; margin: 4px 2px; }
+
+/* Preferences dialog */
+#prefs { border: 1px solid #cfcfcf; border-radius: 8px; padding: 18px; }
+#prefs::backdrop { background: rgba(0, 0, 0, 0.25); }
+.prefs-form { display: flex; flex-direction: column; gap: 12px; min-width: 260px; }
+.prefs-form label { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.prefs-form select, .prefs-form input { font: inherit; padding: 3px 6px; }
+.prefs-form menu { margin: 0; padding: 0; display: flex; justify-content: flex-end; }
+
+/* Print: only the document content, no toolbar/scrollbars/chrome. */
+@media print {
+  #toolbar,
+  #ctxmenu,
+  #prefs { display: none !important; }
+
+  html, body { height: auto; overflow: visible; display: block; }
+  #editor { overflow: visible; height: auto; }
+  .ProseMirror {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    color: #000;
+  }
+  /* Avoid awkward breaks inside these blocks. */
+  .ProseMirror pre,
+  .ProseMirror blockquote,
+  .ProseMirror table,
+  .ProseMirror img { break-inside: avoid; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { color: #eaeaea; background: #1e1e1e; }
+  #editor { background: #171717; }
+  .ProseMirror { background: #1e1e1e; }
+  #toolbar { background: #262626; border-color: #333; }
+  #statusbar { background: #262626; border-color: #333; color: #999; }
+  #status-brand { border-left-color: #444; color: #777; }
+  #toolbar button:hover { background: #333; border-color: #444; }
+  #toolbar .sep { background: #444; }
+  .ProseMirror code, .ProseMirror pre { background: #2a2a2a; }
+  .ProseMirror th { background: #2a2a2a; }
+  .ProseMirror th, .ProseMirror td { border-color: #444; }
+  .ctxmenu { background: #2a2a2a; border-color: #444; }
+  .ctx-item:hover { background: #333d52; }
+  .ctx-sep { background: #444; }
+  #prefs { background: #2a2a2a; border-color: #444; }
+}

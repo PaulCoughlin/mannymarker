@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Untitled — Markdown Editor</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+
+  <body>
+    <div id="toolbar">
+      <button data-cmd="h1" title="Heading 1">H1</button>
+      <button data-cmd="h2" title="Heading 2">H2</button>
+      <button data-cmd="h3" title="Heading 3">H3</button>
+      <button data-cmd="p" title="Body text">P</button>
+      <span class="sep"></span>
+      <button data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+      <button data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+      <button data-cmd="code" title="Inline code">&lt;/&gt;</button>
+      <span class="sep"></span>
+      <button data-cmd="bulletList" title="Bulleted list">• List</button>
+      <button data-cmd="orderedList" title="Numbered list">1. List</button>
+      <span class="sep"></span>
+      <button data-cmd="blockquote" title="Blockquote">&ldquo; Quote</button>
+      <button data-cmd="rule" title="Horizontal rule">― Rule</button>
+      <button data-cmd="link" title="Insert link">Link</button>
+      <span class="sep"></span>
+      <button data-cmd="table" title="Insert table">Table</button>
+      <span class="spacer"></span>
+      <button data-cmd="dictionary" title="Edit custom dictionary" class="ghost">📖 Dictionary</button>
+    </div>
+
+    <div id="editor"></div>
+
+    <div id="statusbar">
+      <span id="status-path">Unsaved document</span>
+      <span id="status-saved"></span>
+      <span id="status-count">0 words</span>
+      <span id="status-brand" title="MannyMarker — native markdown, the way Manny McGuire likes it">MannyMarker</span>
+    </div>
+
+    <!-- Preferences dialog (hidden until opened) -->
+    <dialog id="prefs">
+      <form method="dialog" class="prefs-form">
+        <label>Font <select id="pref-font"></select></label>
+        <label>Size (px) <input id="pref-size" type="number" min="6" max="96" /></label>
+        <label>Spellcheck
+          <select id="pref-spell">
+            <option value="en-GB">English (UK)</option>
+            <option value="en-US">English (US)</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+        <label>Page width (px) <input id="pref-width" type="number" min="400" max="2000" step="20" /></label>
+        <label>Page margin (px) <input id="pref-margin" type="number" min="0" max="200" step="4" /></label>
+        <menu><button value="close">Close</button></menu>
+      </form>
+    </dialog>
+
+    <!-- Right-click context menu (hidden until shown) -->
+    <div id="ctxmenu" class="ctxmenu" hidden></div>
+  </body>
+</html>
