@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "MannyMarker",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "identifier": "com.mannymcguire.mannymarker",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -14,8 +14,8 @@
     "windows": [
       {
         "title": "MannyMarker",
-        "width": 1244,
-        "height": 1240,
+        "width": 1250,
+        "height": 1260,
         "visible": false
       }
     ],

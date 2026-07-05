@@ -133,7 +133,7 @@ body {
 }
 .ProseMirror th, .ProseMirror td {
   border: 1px solid #cfcfcf;
-  padding: 4px 8px;
+  padding: 2px 8px;
   min-width: 40px;
   vertical-align: top;
 }

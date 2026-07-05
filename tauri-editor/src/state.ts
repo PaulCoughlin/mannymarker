@@ -74,14 +74,17 @@ export class DocumentState {
     this.loadClean("");
   }
 
-  /** Returns true if it is safe to discard the current document. */
+  /**
+   * Standard Windows unsaved-changes flow: Save / Don't Save / Cancel (native
+   * three-button dialog via the Rust shell). Returns true when it is safe to
+   * proceed — the document was saved or explicitly not saved. Choosing Save on
+   * an unnamed document opens Save As; cancelling that aborts too.
+   */
   private async confirmDiscard(): Promise<boolean> {
     if (!this.dirty) return true;
-    // ask() returns true for "Yes" (discard) — we phrase it as a save warning.
-    return await ask("You have unsaved changes. Discard them?", {
-      title: "Markdown Editor",
-      kind: "warning",
-    });
+    const choice = await invoke<string>("confirm_save", { fileName: this.fileName() });
+    if (choice === "save") return await this.save();
+    return choice === "discard";
   }
 
   async newDocument(): Promise<void> {

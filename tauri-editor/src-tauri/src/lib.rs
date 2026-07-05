@@ -66,6 +66,37 @@ fn startup_file() -> Option<String> {
     }
 }
 
+/// Standard Windows unsaved-changes prompt: Save / Don't Save / Cancel.
+/// Returns "save", "discard", or "cancel". Async so the blocking native dialog
+/// runs off the main thread.
+#[tauri::command]
+async fn confirm_save(app: tauri::AppHandle, file_name: String) -> String {
+    use tauri_plugin_dialog::{
+        DialogExt, MessageDialogButtons, MessageDialogKind, MessageDialogResult,
+    };
+    let result = app
+        .dialog()
+        .message(format!("Do you want to save changes to {file_name}?"))
+        .title("MannyMarker")
+        .kind(MessageDialogKind::Warning)
+        .buttons(MessageDialogButtons::YesNoCancelCustom(
+            "Save".to_string(),
+            "Don't Save".to_string(),
+            "Cancel".to_string(),
+        ))
+        .blocking_show_with_result();
+    match result {
+        MessageDialogResult::Yes => "save".to_string(),
+        MessageDialogResult::No => "discard".to_string(),
+        MessageDialogResult::Custom(label) => match label.as_str() {
+            "Save" => "save".to_string(),
+            "Don't Save" => "discard".to_string(),
+            _ => "cancel".to_string(),
+        },
+        _ => "cancel".to_string(),
+    }
+}
+
 /// Saved window geometry from the frontend's settings.json — physical pixels
 /// (inner size + outer position). None on first run or unreadable settings.
 fn saved_window_state(app: &tauri::App) -> Option<(f64, f64, i32, i32)> {
@@ -99,8 +130,8 @@ fn on_a_monitor(win: &tauri::WebviewWindow, x: i32, y: i32) -> bool {
 
 /// The window's intended size, in logical (scale-independent) pixels. Must match the
 /// width/height in tauri.conf.json.
-const LOGICAL_W: f64 = 1244.0;
-const LOGICAL_H: f64 = 1240.0;
+const LOGICAL_W: f64 = 1250.0;
+const LOGICAL_H: f64 = 1260.0;
 
 /// Centers the window on the monitor containing the mouse cursor, at the correct size
 /// for THAT monitor's DPI scale.
@@ -162,7 +193,8 @@ pub fn run() {
             write_file,
             file_mtime,
             open_dictionary,
-            startup_file
+            startup_file,
+            confirm_save
         ])
         .setup(|app| {
             // Ensure the config dir exists so the frontend's settings writes never
