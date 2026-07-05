@@ -8,6 +8,8 @@ headings look like headings, bold looks bold — but the file on disk is always
 plain `.md`. No server, no browser tab, no terminal. In the spirit of
 [Typora](https://typora.io/), deliberately kept minimal: open, edit, save.
 
+![MannyMarker editing its own user guide](docs/screenshot.png)
+
 ## Stack
 
 - **Tauri 2** (Rust shell + WebView2 frontend) — small binary, fast launch,
