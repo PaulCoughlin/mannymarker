@@ -172,6 +172,21 @@ describe("markdown round-trip", () => {
     );
   });
 
+  // Images are inline in markdown — an image inside a sentence must stay in its
+  // paragraph. As a block node it split the paragraph on load and glued the
+  // surrounding text back together (or swallowed a following heading) on save.
+  it("image inside a sentence stays inline", () => {
+    expect(rt("Before ![alt](https://example.com/x.png) after.")).toBe(
+      "Before ![alt](https://example.com/x.png) after."
+    );
+  });
+
+  it("image paragraph followed by a heading keeps them separate", () => {
+    expect(rt("Look: ![alt](https://example.com/x.png)\n\n## Next section")).toBe(
+      "Look: ![alt](https://example.com/x.png)\n\n## Next section"
+    );
+  });
+
   it("table", () => {
     expect(rt("| A | B |\n| --- | --- |\n| 1 | 2 |")).toBe(
       "| A | B |\n| --- | --- |\n| 1 | 2 |"

@@ -93,7 +93,9 @@ export function createEditor(element: HTMLElement, onUpdate: () => void): Editor
       // StarterKit (v3) bundles headings, bold, italic, lists, code, blockquote, hr,
       // paragraph, AND link — so link is configured here rather than added separately.
       StarterKit.configure({ link: { openOnClick: false } }),
-      Image,
+      // Images are inline content in markdown; as a block node (the default) an
+      // image split its paragraph on load and merged adjacent text on save.
+      Image.configure({ inline: true }),
       MarkdownSubscript,
       MarkdownSuperscript,
       Table.configure({ resizable: false }),
