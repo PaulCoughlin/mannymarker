@@ -23,6 +23,10 @@ async function bootstrap() {
   const state = new DocumentState(editor);
   doc.state = state;
   state.init();
+
+  // A file passed on the command line ("Open with" / file association) loads at start.
+  const startupFile = await invoke<string | null>("startup_file");
+  if (startupFile) await state.openPath(startupFile);
   updateWordCount();
 
   function updateWordCount() {

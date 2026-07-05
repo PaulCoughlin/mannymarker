@@ -52,6 +52,20 @@ fn open_dictionary(app: tauri::AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
+/// Returns the file path passed on the command line (e.g. Windows "Open with" or a
+/// file-type association), or None when launched bare. Only an existing file counts —
+/// stray flags or bad paths are ignored rather than surfaced as an open error.
+#[tauri::command]
+fn startup_file() -> Option<String> {
+    let arg = std::env::args().nth(1)?;
+    let path = std::path::PathBuf::from(&arg);
+    if path.is_file() {
+        Some(path.to_string_lossy().into_owned())
+    } else {
+        None
+    }
+}
+
 /// The window's intended size, in logical (scale-independent) pixels. Must match the
 /// width/height in tauri.conf.json.
 const LOGICAL_W: f64 = 1300.0;
@@ -116,7 +130,8 @@ pub fn run() {
             read_file,
             write_file,
             file_mtime,
-            open_dictionary
+            open_dictionary,
+            startup_file
         ])
         .setup(|app| {
             // Open on whichever monitor the mouse cursor is currently on, centered.

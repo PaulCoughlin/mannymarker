@@ -95,11 +95,16 @@ export class DocumentState {
     if (!(await this.confirmDiscard())) return;
     const selected = await openDialog({ multiple: false, filters: MD_FILTER });
     if (typeof selected !== "string") return;
+    await this.openPath(selected);
+  }
+
+  /** Load a known path directly (Open dialog result, or a file passed on launch). */
+  async openPath(path: string): Promise<void> {
     try {
-      const text = await invoke<string>("read_file", { path: selected });
-      this.currentPath = selected;
+      const text = await invoke<string>("read_file", { path });
+      this.currentPath = path;
       this.loadClean(text);
-      const mtime = await invoke<number | null>("file_mtime", { path: selected });
+      const mtime = await invoke<number | null>("file_mtime", { path });
       this.setSaved(mtime ?? null);
     } catch (e) {
       await ask(`Could not open file:\n${e}`, { title: "Markdown Editor", kind: "error" });
