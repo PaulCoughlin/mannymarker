@@ -18,7 +18,9 @@ $cargoBin = Join-Path $env:USERPROFILE ".cargo\bin"
 if (Test-Path $cargoBin) { $env:PATH = "$cargoBin;$env:PATH" }
 
 # A running instance locks the portable exe and would make the copy fail - close it.
-Get-Process MannyMarker -ErrorAction SilentlyContinue | Stop-Process -Force
+# Non-fatal: Stop-Process can race a process that is already exiting ("Access is
+# denied"); if the exe is genuinely still locked, Copy-Item below fails loudly.
+try { Get-Process MannyMarker -ErrorAction Stop | Stop-Process -Force -ErrorAction Stop } catch {}
 Start-Sleep -Milliseconds 300
 
 Write-Host "Building release exe (no installer bundles)..." -ForegroundColor Cyan
