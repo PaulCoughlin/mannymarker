@@ -95,7 +95,9 @@ export function createEditor(element: HTMLElement, onUpdate: () => void): Editor
       StarterKit.configure({ link: { openOnClick: false } }),
       // Images are inline content in markdown; as a block node (the default) an
       // image split its paragraph on load and merged adjacent text on save.
-      Image.configure({ inline: true }),
+      // allowBase64: the default (false) silently DELETES data: images on load,
+      // so a subsequent save destroys them.
+      Image.configure({ inline: true, allowBase64: true }),
       MarkdownSubscript,
       MarkdownSuperscript,
       Table.configure({ resizable: false }),

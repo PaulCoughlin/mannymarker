@@ -175,6 +175,15 @@ describe("markdown round-trip", () => {
   // Images are inline in markdown — an image inside a sentence must stay in its
   // paragraph. As a block node it split the paragraph on load and glued the
   // surrounding text back together (or swallowed a following heading) on save.
+  // Image with a data: URI — allowBase64 defaults to false in the Image extension,
+  // which silently DELETED such images (parsed to an empty paragraph, so a save
+  // destroyed them). Must round-trip byte-identical.
+  it("data-uri image survives", () => {
+    const md =
+      "![red dot](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAE0lEQVR42mN44OCABzGMSmOTBgCFE4mBNIKX7AAAAABJRU5ErkJggg==)";
+    expect(rt(md)).toBe(md);
+  });
+
   it("image inside a sentence stays inline", () => {
     expect(rt("Before ![alt](https://example.com/x.png) after.")).toBe(
       "Before ![alt](https://example.com/x.png) after."
