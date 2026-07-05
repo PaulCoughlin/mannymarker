@@ -53,6 +53,61 @@ function allowedInlineHtml(md: any): void {
  * rule is registered here too (setup hooks only exist on extensions with a
  * markdown spec, and this one always loads).
  */
+/**
+ * Table serializer with column alignment. markdown-it parses the delimiter row
+ * (`:---`, `:---:`, `---:`) into an `align` attr on each cell, and the editor
+ * renders it — but tiptap-markdown's stock serializer hard-codes `---`, stripping
+ * alignment on every save. Same row/cell walk as upstream, plus the delimiter row
+ * derived from the header cells' align attrs.
+ *
+ * Upstream also falls back to an HTML placeholder for tables it deems
+ * non-serializable (merged cells, multi-block cells) — with html:false that
+ * writes a literal `[table]`, destroying the table. Merged cells cannot occur
+ * here (markdown can't express them; the UI has no merge), and for the one
+ * reachable case — a second paragraph typed into a cell — serializing the first
+ * paragraph beats destroying the table, so the fallback is dropped.
+ */
+const DELIMITER: Record<string, string> = {
+  left: ":---",
+  center: ":---:",
+  right: "---:",
+};
+
+const MarkdownTable = Table.extend({
+  addStorage() {
+    return {
+      markdown: {
+        serialize(state: any, node: any) {
+          state.inTable = true;
+          node.forEach((row: any, _p: number, i: number) => {
+            state.write("| ");
+            row.forEach((col: any, _p2: number, j: number) => {
+              if (j) state.write(" | ");
+              const cellContent = col.firstChild;
+              if (cellContent.textContent.trim()) {
+                state.renderInline(cellContent);
+              }
+            });
+            state.write(" |");
+            state.ensureNewLine();
+            if (!i) {
+              const delimiterRow: string[] = [];
+              row.forEach((col: any) => {
+                delimiterRow.push(DELIMITER[col.attrs.align] ?? "---");
+              });
+              state.write(`| ${delimiterRow.join(" | ")} |`);
+              state.ensureNewLine();
+            }
+          });
+          state.closeBlock(node);
+          state.inTable = false;
+        },
+        parse: {}, // handled by markdown-it
+      },
+    };
+  },
+});
+
 const MarkdownSubscript = Subscript.extend({
   addStorage() {
     return {
@@ -100,7 +155,7 @@ export function createEditor(element: HTMLElement, onUpdate: () => void): Editor
       Image.configure({ inline: true, allowBase64: true }),
       MarkdownSubscript,
       MarkdownSuperscript,
-      Table.configure({ resizable: false }),
+      MarkdownTable.configure({ resizable: false }),
       TableRow,
       TableHeader,
       TableCell,

@@ -134,6 +134,18 @@ describe("markdown round-trip", () => {
     expect(rt("`a <b> tag`")).toBe("`a <b> tag`");
   });
 
+  // Table column alignment lives in each cell's `align` attr (parsed from the
+  // delimiter row); the stock serializer hard-coded `---` and stripped it on save.
+  it("table alignment markers survive", () => {
+    const md = "| Left | Center | Right |\n| :--- | :---: | ---: |\n| l | c | r |";
+    expect(rt(md)).toBe(md);
+  });
+
+  it("table without alignment stays plain", () => {
+    const md = "| A | B |\n| --- | --- |\n| a | b |";
+    expect(rt(md)).toBe(md);
+  });
+
   // ---- container blocks ----
 
   it("bullet list", () => {
