@@ -1,5 +1,8 @@
 # MannyMarker
 
+[![version](https://img.shields.io/github/package-json/v/PaulCoughlin/mannymarker?filename=tauri-editor%2Fpackage.json&label=version&color=2ea44f)](https://github.com/PaulCoughlin/mannymarker/blob/main/HELP.md)
+[![CI](https://github.com/PaulCoughlin/mannymarker/actions/workflows/ci.yml/badge.svg)](https://github.com/PaulCoughlin/mannymarker/actions/workflows/ci.yml)
+
 A small, fast, native Windows markdown editor. You edit a **rendered** view —
 headings look like headings, bold looks bold — but the file on disk is always
 plain `.md`. No server, no browser tab, no terminal. In the spirit of
