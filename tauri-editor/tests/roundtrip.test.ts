@@ -90,6 +90,50 @@ describe("markdown round-trip", () => {
     expect(toMarkdown(editor).trim()).toBe("H~2~O");
   });
 
+  // ---- inline HTML exceptions ----
+  // Raw HTML passthrough is part of official markdown, and GitHub-flavored files
+  // routinely use these tags (GFM has no sub/sup syntax at all). Tags that map onto
+  // vocabulary marks are parsed and serialize back as native markdown; anything
+  // else stays visible literal text.
+
+  it("html sub/sup tags parse to marks and save as native syntax", () => {
+    setMarkdown(editor, "H<sub>2</sub>O and x<sup>2</sup>");
+    expect(editor.getHTML()).toContain("<sub>");
+    expect(editor.getHTML()).toContain("<sup>");
+    expect(toMarkdown(editor).trim()).toBe("H~2~O and x^2^");
+  });
+
+  it("html bold/italic tags parse to marks", () => {
+    setMarkdown(editor, "<b>bold</b> and <strong>strong</strong> and <i>it</i> and <em>em</em>");
+    expect(toMarkdown(editor).trim()).toBe("**bold** and **strong** and *it* and *em*");
+  });
+
+  it("html strikethrough tags parse to marks", () => {
+    setMarkdown(editor, "<s>gone</s> and <del>removed</del>");
+    expect(toMarkdown(editor).trim()).toBe("~~gone~~ and ~~removed~~");
+  });
+
+  it("html code tag parses to inline code", () => {
+    setMarkdown(editor, "run <code>npm test</code> now");
+    expect(toMarkdown(editor).trim()).toBe("run `npm test` now");
+  });
+
+  it("html br becomes a hard break", () => {
+    setMarkdown(editor, "line one<br>line two");
+    expect(editor.getHTML()).toContain("<br");
+    expect(toMarkdown(editor).trim()).toBe("line one\\\nline two");
+  });
+
+  it("other html tags stay literal text", () => {
+    setMarkdown(editor, "<kbd>K</kbd> and <span>plain</span>");
+    expect(editor.getText()).toContain("<kbd>K</kbd>");
+    expect(editor.getText()).toContain("<span>plain</span>");
+  });
+
+  it("allowed tags inside backtick code spans stay literal", () => {
+    expect(rt("`a <b> tag`")).toBe("`a <b> tag`");
+  });
+
   // ---- container blocks ----
 
   it("bullet list", () => {
