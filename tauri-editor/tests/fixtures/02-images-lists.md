@@ -8,7 +8,7 @@ Image with title: ![tiny](https://placehold.co/60.png "hover title")
 
 An image right in the middle of a sentence ![dot](https://placehold.co/16.png) should not break the paragraph.
 
-Embedded data-URI image (no network needed): ![red dot](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAKklEQVR4nGP8z8DwnwEPYMInOWQUsDAwMDDeZGDAGRBKDESEwtBQAAgAAPMbAyEc6hqDAAAAAElFTkSuQmCC)
+Embedded data-URI image (no network needed): ![red dot](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAE0lEQVR42mN44OCABzGMSmOTBgCFE4mBNIKX7AAAAABJRU5ErkJggg==)
 
 ## Heading after an image paragraph
 
