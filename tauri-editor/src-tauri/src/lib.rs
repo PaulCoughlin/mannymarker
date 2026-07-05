@@ -68,8 +68,8 @@ fn startup_file() -> Option<String> {
 
 /// The window's intended size, in logical (scale-independent) pixels. Must match the
 /// width/height in tauri.conf.json.
-const LOGICAL_W: f64 = 1300.0;
-const LOGICAL_H: f64 = 1100.0;
+const LOGICAL_W: f64 = 1400.0;
+const LOGICAL_H: f64 = 1200.0;
 
 /// Centers the window on the monitor containing the mouse cursor, at the correct size
 /// for THAT monitor's DPI scale.

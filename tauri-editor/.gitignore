@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test screenshots dropped in by hand during visual testing
+tests/fixtures/*.png

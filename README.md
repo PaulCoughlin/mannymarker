@@ -73,10 +73,18 @@ is ~8–9 MB and runs on any Windows 11 machine with Edge WebView2 installed
 
 ## Supported markdown
 
-Headings (H1–H6), bold / italic / bold-italic, subscript & superscript, ordered
-& unordered lists (nested), inline code and fenced code blocks, links, inline
-images, blockquotes, horizontal rules, tables (with row/column/header editing),
-paragraphs.
+Headings (H1–H6), bold / italic / bold-italic, strikethrough, subscript
+(`~x~`) & superscript (`^x^`), ordered & unordered lists (nested), inline code
+and fenced code blocks, links, inline images (remote and base64 `data:` URIs),
+blockquotes (nested), horizontal rules, tables with column alignment
+(`:---` / `:---:` / `---:`, preserved on save), paragraphs.
+
+**Inline HTML exceptions.** Raw HTML passthrough is part of official markdown,
+and GitHub-flavored files routinely use it (GFM has no sub/sup syntax at all).
+Tags that map onto the vocabulary are parsed and saved back as native markdown
+syntax: `<sub>`, `<sup>`, `<b>`, `<strong>`, `<i>`, `<em>`, `<s>`, `<del>`,
+`<code>`, `<br>`. All other HTML stays visible as literal text — honest about
+what a save preserves.
 
 ## How this app came about
 

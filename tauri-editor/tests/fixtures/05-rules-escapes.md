@@ -8,19 +8,19 @@ Above the rule.
 
 Between rules.
 
-***
+---
 
-Below the rules.
+Below the rulers.
 
 ## Escapes and edge cases
 
 Literal asterisks: \*not italic\*. Literal underscore: \_not italic\_.
 
-Literal backtick: \`not code\`. Literal hash at line start: \# not a heading.
+Literal backtick: \`not code\`. Literal hash at line start: # not a heading.
 
 Special characters: & < > " ' © é ü ñ — – … "curly quotes" 'single'
 
 A very long unbroken word to test wrapping: antidisestablishmentarianismsupercalifragilisticexpialidocious
 
-Hard line break (two trailing spaces):  
+Hard line break (two trailing spaces):\
 this line follows a hard break.
