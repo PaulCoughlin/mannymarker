@@ -5,6 +5,38 @@ import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { Table, TableRow, TableHeader, TableCell } from "@tiptap/extension-table";
 import { Markdown } from "tiptap-markdown";
+// @ts-expect-error no type definitions published
+import markdownItSub from "markdown-it-sub";
+// @ts-expect-error no type definitions published
+import markdownItSup from "markdown-it-sup";
+
+/**
+ * tiptap-markdown knows nothing about sub/superscript: markdown-it has no ~x~ / ^x^
+ * syntax built in, and the marks have no serializer rule — so `H~2~O` in a file
+ * arrived as literal text. Each mark declares its markdown spec here: a markdown-it
+ * plugin for parsing, and open/close tokens for serializing.
+ */
+const MarkdownSubscript = Subscript.extend({
+  addStorage() {
+    return {
+      markdown: {
+        serialize: { open: "~", close: "~", mixable: true, expelEnclosingWhitespace: true },
+        parse: { setup: (markdownit: any) => markdownit.use(markdownItSub) },
+      },
+    };
+  },
+});
+
+const MarkdownSuperscript = Superscript.extend({
+  addStorage() {
+    return {
+      markdown: {
+        serialize: { open: "^", close: "^", mixable: true, expelEnclosingWhitespace: true },
+        parse: { setup: (markdownit: any) => markdownit.use(markdownItSup) },
+      },
+    };
+  },
+});
 
 /**
  * Builds the TipTap editor — the rendered-document surface. The enabled extensions
@@ -20,8 +52,8 @@ export function createEditor(element: HTMLElement, onUpdate: () => void): Editor
       // paragraph, AND link — so link is configured here rather than added separately.
       StarterKit.configure({ link: { openOnClick: false } }),
       Image,
-      Subscript,
-      Superscript,
+      MarkdownSubscript,
+      MarkdownSuperscript,
       Table.configure({ resizable: false }),
       TableRow,
       TableHeader,

@@ -76,18 +76,18 @@ describe("markdown round-trip", () => {
     );
   });
 
+  // Sub/superscript must produce the actual mark, not just survive as plain text —
+  // a `^` that is never parsed round-trips unchanged and gives a false positive.
   it("superscript", () => {
-    expect(rt("E=mc^2^")).toBe("E=mc^2^");
+    setMarkdown(editor, "E=mc^2^");
+    expect(editor.getHTML()).toContain("<sup>");
+    expect(toMarkdown(editor).trim()).toBe("E=mc^2^");
   });
 
-  // KNOWN ISSUE (2026-07-03): subscript does NOT round-trip from markdown source.
-  // `H~2~O` is emitted back as `H\~2\~O` — the `~` is escaped because tiptap-markdown
-  // treats it as ambiguous with StarterKit's strikethrough (`~~`). Superscript (`^^`)
-  // is unaffected. The Subscript mark is applied when inserted via the editor, but
-  // cannot be loaded from existing `~...~` markdown. Tracked for resolution; the test
-  // below pins the current (wrong) behaviour so we notice if it ever changes.
-  it("subscript — KNOWN: escapes the tilde (does not round-trip)", () => {
-    expect(rt("H~2~O")).toBe("H\\~2\\~O");
+  it("subscript", () => {
+    setMarkdown(editor, "H~2~O");
+    expect(editor.getHTML()).toContain("<sub>");
+    expect(toMarkdown(editor).trim()).toBe("H~2~O");
   });
 
   // ---- container blocks ----
