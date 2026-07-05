@@ -4,6 +4,7 @@ import { Image } from "@tiptap/extension-image";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { Table, TableRow, TableHeader, TableCell } from "@tiptap/extension-table";
+import { Text } from "@tiptap/extension-text";
 import { Markdown } from "tiptap-markdown";
 // @ts-expect-error no type definitions published
 import markdownItSub from "markdown-it-sub";
@@ -53,6 +54,31 @@ function allowedInlineHtml(md: any): void {
  * rule is registered here too (setup hooks only exist on extensions with a
  * markdown spec, and this one always loads).
  */
+/**
+ * Text serializer without blanket HTML-entity escaping. tiptap-markdown writes
+ * every < and > as &lt;/&gt;, uglifying files ("5 < 6" → "5 &lt; 6"). A `>` is
+ * never special mid-text, and `<` only matters when what follows would re-parse
+ * as one of the allowed tags above — that case becomes &lt; (a backslash would
+ * itself be escaped by the serializer), which reloads as literal text instead of
+ * a real mark. Everything else is written verbatim.
+ */
+const MarkdownText = Text.extend({
+  addStorage() {
+    return {
+      markdown: {
+        serialize(state: any, node: any) {
+          state.text(
+            node.text.replace(/</g, (_m: string, off: number, s: string) =>
+              ALLOWED_TAG_RE.test(s.slice(off)) ? "&lt;" : "<"
+            )
+          );
+        },
+        parse: {}, // handled by markdown-it
+      },
+    };
+  },
+});
+
 /**
  * Table serializer with column alignment. markdown-it parses the delimiter row
  * (`:---`, `:---:`, `---:`) into an `align` attr on each cell, and the editor
@@ -147,7 +173,9 @@ export function createEditor(element: HTMLElement, onUpdate: () => void): Editor
     extensions: [
       // StarterKit (v3) bundles headings, bold, italic, lists, code, blockquote, hr,
       // paragraph, AND link — so link is configured here rather than added separately.
-      StarterKit.configure({ link: { openOnClick: false } }),
+      // text: false — replaced by MarkdownText below (save-time escaping).
+      StarterKit.configure({ link: { openOnClick: false }, text: false }),
+      MarkdownText,
       // Images are inline content in markdown; as a block node (the default) an
       // image split its paragraph on load and merged adjacent text on save.
       // allowBase64: the default (false) silently DELETES data: images on load,

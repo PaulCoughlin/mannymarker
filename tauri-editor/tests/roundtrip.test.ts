@@ -130,6 +130,38 @@ describe("markdown round-trip", () => {
     expect(editor.getText()).toContain("<span>plain</span>");
   });
 
+  // Angle brackets in plain text must not be entity-escaped on save — the stock
+  // Text serializer wrote &lt;/&gt;, uglifying files ("5 < 6" → "5 &lt; 6").
+  it("bare angle brackets in text survive a save", () => {
+    expect(rt("5 < 6 and 7 > 2")).toBe("5 < 6 and 7 > 2");
+    expect(rt('Chars: & < > "quoted"')).toBe('Chars: & < > "quoted"');
+  });
+
+  it("non-exception tags survive a save as literal text", () => {
+    expect(rt("A <kbd>K</kbd> tag")).toBe("A <kbd>K</kbd> tag");
+  });
+
+  // Text that LOOKS like an allowed tag but is literal (typed in the editor, not
+  // parsed from markdown) must be escaped on save, or the next open would turn it
+  // into a real mark.
+  it("literal text resembling an allowed tag is escaped on save", () => {
+    editor.commands.setContent({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "literal <b>not bold</b> here" }],
+        },
+      ],
+    });
+    const saved = toMarkdown(editor).trim();
+    expect(saved).toBe("literal &lt;b>not bold&lt;/b> here");
+    // and reloading that output keeps it literal text, not bold
+    setMarkdown(editor, saved);
+    expect(editor.getHTML()).not.toContain("<strong>");
+    expect(editor.getText()).toContain("<b>not bold</b>");
+  });
+
   it("allowed tags inside backtick code spans stay literal", () => {
     expect(rt("`a <b> tag`")).toBe("`a <b> tag`");
   });
