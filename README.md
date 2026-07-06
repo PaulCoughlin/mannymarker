@@ -54,6 +54,12 @@ builds the release binary, and offers to launch it:
 cd tauri-editor
 ./compile.ps1
 ```
+For my personal use, but included, a compile-local.ps1 which compiles the standalone, without MSI/NSIS installers, and drops a copy of the exe into "C:\Portable\Manny Marker\" (configurable)
+
+```powershell
+cd tauri-editor
+./compile-local.ps1
+```
 
 ## Test
 
