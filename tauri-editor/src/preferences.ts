@@ -74,9 +74,11 @@ export async function saveSettings(s: Settings): Promise<void> {
  */
 export function applySettings(editorRoot: HTMLElement, s: Settings): void {
   editorRoot.style.fontFamily = s.fontFamily;
-  editorRoot.style.fontSize = `${s.fontSize}px`;
 
-  // Width and horizontal margin are driven by CSS variables so they can change live.
+  // Font size, width, and horizontal margin are driven by CSS variables so they can
+  // change live. Font size must go through a variable the .ProseMirror rule reads —
+  // an inline size on #editor would be overridden by .ProseMirror's own font-size.
+  document.documentElement.style.setProperty("--editor-font-size", `${s.fontSize}px`);
   document.documentElement.style.setProperty("--editor-width", `${s.editorWidth}px`);
   document.documentElement.style.setProperty("--editor-margin", `${s.editorMargin}px`);
 
